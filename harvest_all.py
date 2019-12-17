@@ -16,18 +16,6 @@ start_time = datetime.now()
 properties = { "forename" : "givenName", "name_link" : "surnamePrefix", "surname" : "baseSurname", "add_name" : "trailingPatronym", "role_name" : "prefix", "gen_name" : "givenNameSuffix" }
 
 
-def do_keyword():
-    pass
-
-
-def do_language():
-    pass
-
-
-def do_location():
-    pass
-
-
 def find_property(value):
     result = properties[value.lower()]
     if result:
@@ -61,21 +49,14 @@ def do_links(link_list, uitvoer):
 '''
     for link in link_list:
         url = link['url']
-#        url = url.replace('[', '%5B')
-#        url = url.replace(']', '%5D')
-#        url = url.replace('|', '%7C')
         label = link['label']
         if re.search(': http', url):
-#            stderr(url)
             res = re.split(': ', url)
             label = '{} ({})'.format(label, res[0])
             url = res[1]
         url = unquote(url)
         url = quote(url, safe='/:?=+,')
         uitvoer.write(link_str.format(url=url, label=escape(label)))
-
-def do_keyword():
-    pass
 
 
 def do_header(uitvoer):
@@ -110,10 +91,6 @@ def escape(txt):
     return txt
 
 def scrape_line(uitvoer, item, ind=4, parent=""):
-#    stderr(parent)
-#    stderr(item.__class__)
-#    if isinstance(item, dict):
-#        stderr(list(item.keys())[0])
     schema_title = ""
     for key,elem in item.items():
         if key=='@relations':
@@ -124,8 +101,6 @@ def scrape_line(uitvoer, item, ind=4, parent=""):
         if key[0]=="^" or key[0]=="@":
             key = key[1:]
         if isinstance(elem,list):
-#            uitvoer.write("{}<schema:{}>\n".format(indent(ind), key))
-#            uitvoer.write("{}<rdf:Seq>\n".format(indent(ind+2)))
             if key=='names':
                 do_names(elem, uitvoer)
             elif key=='links':
@@ -141,8 +116,6 @@ def scrape_line(uitvoer, item, ind=4, parent=""):
                         uitvoer.write("{0}<schema:{1}>{2}</schema:{1}>\n".format(indent(ind+4), key[0:-1],e))
                     else:
                         scrape_line(uitvoer, e, ind=ind+4, parent=key)
-#            uitvoer.write("{}</rdf:Seq>\n".format(indent(ind+2)))
-#            uitvoer.write("{}</schema:{}>\n".format(indent(ind), key))
         elif isinstance(elem,dict):
             uitvoer.write("{}<schema:{} rdf:parseType=\"Resource\">\n".format(indent(ind), key))
             scrape_line(uitvoer, elem, ind=ind+4, parent=key)
@@ -162,7 +135,8 @@ def scrape_line(uitvoer, item, ind=4, parent=""):
                     note =  " rdf:parseType=\"Literal\""
                 elif key=="displayName":
                     uitvoer.write("{0}<schema:name>{1}</schema:name>\n".format(indent(ind),elem))
-#                    note =  " rdf:parseType=\"Literal\""
+                if key=="timeStamp":
+                    schema_title = datetime.utcfromtimestamp(elem/1000).strftime("%Y-%m-%d, %H:%M:%S")
                 uitvoer.write("{0}<ww:{1}{3}>{2}</ww:{1}>\n".format(indent(ind),key,elem,note))
     if schema_title!='':
         uitvoer.write("{0}<schema:title>{1}</schema:title>\n".format(indent(ind), schema_title.strip()))
@@ -170,24 +144,6 @@ def scrape_line(uitvoer, item, ind=4, parent=""):
 
 def do_body(uitvoer, record, relations):
     scrape_line(uitvoer, record)
-
-#    for key in record.keys():
-#        stderr(f'{key} ({record[key].__class__})')
- 
-    comment = '''
-    name = record.get('name')
-    title = record.get('title')
-    disp_name = record.get('@displayName')
-    if disp_name:
-        uitvoer.write('    <ww:displayname>{0}</ww:displayname>\n'.format(disp_name))
-        uitvoer.write('    <schema:title>{0}</schema:title>\n'.format(disp_name))
-    if name:
-        uitvoer.write('    <ww:name>{0}</ww:name>\n'.format(name))
-        uitvoer.write('    <schema:name>{0}</schema:name>\n'.format(name))
-    if title:
-        uitvoer.write('    <ww:title>{0}</ww:title>\n'.format(title))
-        uitvoer.write('    <schema:title>{0}</schema:title>\n'.format(title))
-'''
     rels_in_record = record.get('@relations',{})
     for relation in rels_in_record:
         if relation in relations:
@@ -206,7 +162,7 @@ def download_data(domains, datum, test):
         json_uitvoer.write('[')
         domain_rels = relations.get(domain, {})
         start = 0
-        rows = 100 # a larger amount frequentlyn causes a time-out. With this amount downloading the data takes about 15 minutes.
+        rows = 100 # a larger amount frequently causes a time-out. With this amount downloading the data takes about 15 minutes.
         with_relations = 'true'
         if domain=='wwlanguages' or domain=='wwkeywords' or domain=='wwlocations':
             with_relations = 'false'
@@ -273,12 +229,6 @@ if __name__ == "__main__":
     with open('ww_relations.json', encoding='utf-8') as invoer:
         relations = json.load(invoer)
 
-#    if use_files:
-#        read_files
-#    else:
-#        read_remote
-#        read_files
-
     domains = ['wwlanguages', 'wwkeywords', 'wwlocations', 'wwcollectives', 'wwpersons', 'wwdocuments']
 
     if do_download_data:
@@ -305,60 +255,3 @@ if __name__ == "__main__":
 
     stop()
 
-
-
-    do_header(uitvoer)
-    topline = """
-  <ww:{} rdf:about="https://resource.huygens.knaw.nl/ww/{}/{}">
-"""
-    uitvoer.write(topline.format(domain, item['@type'], res['_id']))
-
-
-
-
-#        print(json.dumps(item,indent=4))
-    scrape_line(uitvoer,item)
-    uitvoer.write("  </ww:wwdocument>\n")
-    tel += 1
-    stderr(res.json())
-#    id_list = res.json()['response']['docs']
-#    uitvoer = open("wwdocuments_ids.json", "w", encoding="UTF-8")
-    stderr(json.dumps(res.json(), sort_keys=False, indent=2))
-    teller = 1
-    for id in id_list:
-#        url = "https://repository.huygens.knaw.nl/v2.1/domain/wwdocuments/{}".format(id['id'])
-#        stderr(url)
-#        answer = requests.get(url)
-#        res = answer.json()
-#        stderr(answer.url)
-#        stderr(json.dumps(res, sort_keys=False, indent=2))
-        stderr(res['@displayName'])
-        for key in res['@relations']:
-            #stderr(key)
-            for rel in res['@relations'][key]:
-                #stderr(rel.__class__)
-                #stderr(rel.keys())
-                type = rel['type']
-                if type=='wwkeyword':
-                    do_keyword()
-                elif type=='wwlanguage':
-                    do_language()
-                elif type=='wwcollective':
-                    do_collective()
-                elif type=='wwperson':
-                    do_person()
-                else:
-                    pass
-                    #stderr("unknown type: {}".format(type))
-                #stderr(rel['path'])
-                url_2 = "https://repository.huygens.knaw.nl/v2.1/{}".format(rel['path'])
-                #stderr(url_2)
-                answer_2 = requests.get(url_2)
-                res_2 = answer_2.json()
-                stderr("{}: {}".format(type, res_2['@displayName']))
-#        stderr(answer.url)
-#                stderr(json.dumps(res_2, sort_keys=False, indent=2))
-
-    stop()
-
-# http://docs.python-requests.org/en/master/user/quickstart/#custom-headers
