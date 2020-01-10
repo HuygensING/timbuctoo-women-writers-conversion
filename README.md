@@ -23,3 +23,11 @@ In the second part the script converts the json files to rdf-xml files. These fi
 Downloading the files takes about 15 minutes; converting takes about 10 seconds.
 
 Uploading of the first four files mentioned about is fast, they are small. Persons and documents take more time, several minutes.
+
+## read_metadata
+
+With the read_metadata script the relations are extracted from the metadata.
+
+You get the metadata from: `http://myrepository.org/v2.1/system/vres/MyDataset/metadata`; save as json.
+
+The output of the script is also json.
