@@ -231,8 +231,6 @@ def arguments():
                     default='false')
     ap.add_argument('-c', '--config',
                     help="configuration file")
-    ap.add_argument('-f', '--files',
-                    help="specify the used files")
     ap.add_argument('-t', '--test',
             help="set test: if true (default), maximum download of 100 records",
                     default='true')
@@ -248,9 +246,7 @@ if __name__ == "__main__":
     do_download_data = args['download'].lower()=='true'
     with open(args['config'], encoding='utf-8') as invoer:
         config = json.load(invoer)
-    datum = args.get('files')
-    if datum==None:
-        datum = config.get('file_ext',startdate)
+    datum = config.get('file_ext',startdate)
     test = args['test'].lower()=='true'
     metadata = {}
     with open(config['relations'], encoding='utf-8') as invoer:
