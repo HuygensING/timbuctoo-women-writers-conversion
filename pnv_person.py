@@ -79,5 +79,5 @@ class PnvPerson(dict):
         return self.naam
 
     def to_s(self):
-        pass
+        return self.get('literalName')
 
