@@ -2,9 +2,7 @@
 import re
 import sys
 
-class PnvPerson(dict):
-    def __missing__(self, key):
-        return ""
+class PnvPerson:
 
     categories = [
         "prefix",
