@@ -55,7 +55,7 @@ class PnvPerson:
         elif(categorie == "infix"):
             return self.clean("{} {}",self.naam['InfixTitle'],self.naam['surnamePrefix'])
         elif(categorie == "suffix"):
-            return self.clean("{} {} {}",self.naam['tralingPatronym'],self.naam['honorificSuffix'],self.naam['disambiguatingDescription'])
+            return self.clean("{} {} {}",self.naam['trailingPatronym'],self.naam['honorificSuffix'],self.naam['disambiguatingDescription'])
 
     def clean(self,text):
         pattern = re.compile("  +")
