@@ -38,7 +38,10 @@ class PnvPerson:
         if categorie in self.combinations:
             return self.combine(categorie) 
         if categorie not in self.categories:
-            return self.naam[categorie]
+            try:
+                return self.naam[categorie]
+            except KeyError:
+                pass
         return "unknown name part: {}".format(categorie)
 
     def combine(self,categorie):
