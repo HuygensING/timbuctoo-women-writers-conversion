@@ -2,7 +2,9 @@
 import re
 import sys
 
-class PnvPerson:
+class PnvPerson(dict):
+    def __missing__(self, key):
+        return ""
 
     categories = [
         "prefix",
@@ -44,6 +46,12 @@ class PnvPerson:
                 pass
         return "unknown name part: {}".format(categorie)
 
+    def __get(self, categorie):
+        try:
+            return self.naam[categorie]
+        except KeyError:
+            return ""
+
     def combine(self,categorie):
         if(categorie == "literalName"):
             result = ""
@@ -52,13 +60,13 @@ class PnvPerson:
                     result = result + " {}".format(self.naam[cat])
             return self.clean(result)
         elif(categorie == "surname"):
-            return self.clean("{} {}",self.naam['surnamePrefix'],self.naam['baseSurname'])
-        elif(categorie == "first"):
-            return self.clean("{} {} {}",self.naam['givenName'],self.naam['patronym'],self.naam['givenNameSuffix'])
+            return self.clean(f"{self.naam['surnamePrefix']} {self.naam['baseSurname']}")
+        elif(categorie == "firstName"):
+            return self.clean(f"{self.__get('givenName')} {self.__get('patronym')} {self.__get('givenNameSuffix')}")
         elif(categorie == "infix"):
-            return self.clean("{} {}",self.naam['InfixTitle'],self.naam['surnamePrefix'])
+            return self.clean(f"{self.__get('InfixTitle')} {self.__get('surnamePrefix')}")
         elif(categorie == "suffix"):
-            return self.clean("{} {} {}",self.naam['trailingPatronym'],self.naam['honorificSuffix'],self.naam['disambiguatingDescription'])
+            return self.clean(f"{self.__get('trailingPatronym')} {self.__get('honorificSuffix')} {self.__get('disambiguatingDescription')}")
 
     def clean(self,text):
         pattern = re.compile("  +")
