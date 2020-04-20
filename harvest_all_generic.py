@@ -133,8 +133,8 @@ def scrape_line(uitvoer, item, prefix, ind=4, parent=""):
                     note =  " rdf:datatype=\"http://www.w3.org/2001/XMLSchema#date\""
                 elif key=="notes":
                     note =  " rdf:parseType=\"Literal\""
-                elif key=="displayName":
-                    uitvoer.write("{0}<schema:name>{1}</schema:name>\n".format(indent(ind),elem))
+#                elif key=="displayName":
+#                    uitvoer.write("{0}<schema:name>{1}</schema:name>\n".format(indent(ind),elem))
                 if key=="timeStamp":
                     schema_title = datetime.utcfromtimestamp(elem/1000).strftime("%Y-%m-%d, %H:%M:%S")
                 uitvoer.write("{0}<{4}:{1}{3}>{2}</{4}:{1}>\n".format(indent(ind),key,elem,note,prefix))
@@ -143,13 +143,17 @@ def scrape_line(uitvoer, item, prefix, ind=4, parent=""):
 
 
 def find_schema_title(uitvoer, record, titles):
+    res = ''
     for title in titles:
-        res = record[title]
+        res = record.get(title,'')
         if res:
+            if re.search(r'&', res):
+                res = html.escape(res)
             uitvoer.write(f"    <schema:title>{res}</schema:title>\n")
-            break
-    if not res:
-        uitvoer.write(f"    <schema:title>{record['_id']}</schema:title>\n")
+            return
+    uitvoer.write(f"    <schema:title>{record['_id']}</schema:title>\n")
+    stderr(f'titles: {titles}')
+    stderr(f'record: {record}')
 
 def do_body(uitvoer, record, relations, prefix, titles):
     find_schema_title(uitvoer, record, titles)
