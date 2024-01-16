@@ -1,7 +1,8 @@
 FROM ubuntu:22.04
 
-RUN RUN apt-get update &&\
-    apt-get -y install vi
-    apt-get -y install python3
+RUN apt-get update &&\
+    apt-get -y install vim
 
-ENDPOINT tail -f /dev/null 
+RUN apt-get -y install python-is-python3
+
+# ENDPOINT tail -f /dev/null 
