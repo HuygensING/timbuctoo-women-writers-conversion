@@ -5,4 +5,5 @@ RUN apt-get update &&\
 
 RUN apt-get -y install python-is-python3
 
-# ENDPOINT tail -f /dev/null 
+ENTRYPOINT ["tail", "-f", "/dev/null"]
+
