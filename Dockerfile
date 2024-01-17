@@ -5,5 +5,9 @@ RUN apt-get update &&\
 
 RUN apt-get -y install python-is-python3
 
+RUN apt-get -y install pip
+
+RUN pip install requests
+
 ENTRYPOINT ["tail", "-f", "/dev/null"]
 
